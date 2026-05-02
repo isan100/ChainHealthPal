@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract ChainHealthPal {
+
+    struct HealthRecord {
+        string ipfsHash;       // Encrypted data stored on IPFS
+        uint256 timestamp;
+    }
+
+    mapping(address => HealthRecord[]) private records;
+    mapping(address => mapping(address => bool)) public accessControl;
+
+    event RecordAdded(address indexed user, string ipfsHash);
+    event AccessGranted(address indexed user, address indexed grantee);
+    event AccessRevoked(address indexed user, address indexed grantee);
+
+    // Add new health record (only user)
+    function addRecord(string memory _ipfsHash) public {
+        records[msg.sender].push(
+            HealthRecord({
+                ipfsHash: _ipfsHash,
+                timestamp: block.timestamp
+            })
+        );
+
+        emit RecordAdded(msg.sender, _ipfsHash);
+    }
+
+    // Grant access to another address (e.g., doctor, AI agent)
+    function grantAccess(address _user) public {
+        accessControl[msg.sender][_user] = true;
+        emit AccessGranted(msg.sender, _user);
+    }
+
+    // Revoke access
+    function revokeAccess(address _user) public {
+        accessControl[msg.sender][_user] = false;
+        emit AccessRevoked(msg.sender, _user);
+    }
+
+    // View records (only owner or approved)
+    function getRecords(address _user) public view returns (HealthRecord[] memory) {
+        require(
+            msg.sender == _user || accessControl[_user][msg.sender],
+            "Access denied"
+        );
+
+        return records[_user];
+    }
+
+    // Check access
+    function hasAccess(address _owner, address _viewer) public view returns (bool) {
+        return (_owner == _viewer || accessControl[_owner][_viewer]);
+    }
+}
