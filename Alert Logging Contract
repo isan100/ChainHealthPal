@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract AlertLogger {
+
+    struct Alert {
+        string message;
+        uint256 level;
+        uint256 timestamp;
+    }
+
+    mapping(address => Alert[]) public alerts;
+
+    event AlertCreated(address indexed user, string message, uint256 level);
+
+    function logAlert(address _user, string memory _message, uint256 _level) public {
+        alerts[_user].push(
+            Alert(_message, _level, block.timestamp)
+        );
+
+        emit AlertCreated(_user, _message, _level);
+    }
+
+    function getAlerts(address _user) public view returns (Alert[] memory) {
+        return alerts[_user];
+    }
+}
