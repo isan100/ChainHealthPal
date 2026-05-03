@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "./ConsentManager.sol";
+
+contract HealthDataRegistry {
+
+    struct Record {
+        string ipfsHash;
+        uint256 timestamp;
+    }
+
+    mapping(address => Record[]) private records;
+    ConsentManager public consentManager;
+
+    constructor(address _consentManager) {
+        consentManager = ConsentManager(_consentManager);
+    }
+
+    event RecordAdded(address indexed user, string ipfsHash);
+
+    function addRecord(string memory _ipfsHash) public {
+        records[msg.sender].push(
+            Record(_ipfsHash, block.timestamp)
+        );
+
+        emit RecordAdded(msg.sender, _ipfsHash);
+    }
+
+    function getRecords(address _user) public view returns (Record[] memory) {
+        require(
+            consentManager.hasConsent(_user, msg.sender),
+            "Access denied"
+        );
+
+        return records[_user];
+    }
+}
