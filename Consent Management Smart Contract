@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract ConsentManager {
+
+    mapping(address => mapping(address => bool)) public consent;
+
+    event ConsentGranted(address indexed owner, address indexed grantee);
+    event ConsentRevoked(address indexed owner, address indexed grantee);
+
+    function grantConsent(address _grantee) public {
+        consent[msg.sender][_grantee] = true;
+        emit ConsentGranted(msg.sender, _grantee);
+    }
+
+    function revokeConsent(address _grantee) public {
+        consent[msg.sender][_grantee] = false;
+        emit ConsentRevoked(msg.sender, _grantee);
+    }
+
+    function hasConsent(address _owner, address _viewer) public view returns (bool) {
+        return (_owner == _viewer || consent[_owner][_viewer]);
+    }
+}
