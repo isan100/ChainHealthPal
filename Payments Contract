@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract TherapyPayments {
+
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    event PaymentMade(address indexed user, address indexed therapist, uint256 amount);
+
+    function payTherapist(address payable _therapist) public payable {
+        require(msg.value > 0, "No payment sent");
+
+        _therapist.transfer(msg.value);
+
+        emit PaymentMade(msg.sender, _therapist, msg.value);
+    }
+}
