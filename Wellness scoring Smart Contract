@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract WellnessOracle {
+
+    struct Score {
+        uint256 value;
+        uint256 timestamp;
+    }
+
+    mapping(address => Score[]) public scores;
+
+    event ScoreUpdated(address indexed user, uint256 value);
+
+    function updateScore(address _user, uint256 _value) public {
+        // In production: restrict to oracle/AI backend
+        scores[_user].push(Score(_value, block.timestamp));
+        emit ScoreUpdated(_user, _value);
+    }
+
+    function getLatestScore(address _user) public view returns (uint256) {
+        require(scores[_user].length > 0, "No score available");
+        return scores[_user][scores[_user].length - 1].value;
+    }
+}
